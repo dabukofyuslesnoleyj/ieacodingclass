@@ -6,7 +6,9 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 300 }, // Adding gravity for jumping
+            gravity: {
+                y: 300
+            }, // Adding gravity for jumping
             debug: false
         }
     },
@@ -69,48 +71,68 @@ function create() {
     stars = this.physics.add.group({
         key: 'star',
         repeat: 3,
-        setXY: { x: 12, y: 0, stepX: 120 },
-        setScale: { x: 0.3, y: 0.3},
-        setGravity: {x: 0, y: 0}
+        setXY: {
+            x: 12,
+            y: 0,
+            stepX: 120
+        },
+        setScale: {
+            x: 0.3,
+            y: 0.3
+        },
+        setGravity: {
+            x: 0,
+            y: 0
+        }
     });
-    
+
     //add collision for the star sprites
     this.physics.add.collider(stars, platforms);
-    
+
     // Set up the score text
     scoreText = this.add.text(16, 16, 'Score: 0', {
         fontSize: '32px',
         fill: '#fff'
-    });       
+    });
 
     // Add overlap detection (when player touches star)
     this.physics.add.overlap(player, stars, collectStar, null, this);
-    
+
     // Create a group for bullets
     bullets = this.physics.add.group({
-      defaultKey: 'ball'
+        defaultKey: 'ball'
     });
-    
+
     this.physics.add.collider(bullets, platforms);
-    
+
     // Shoot when the mouse is clicked
-    this.input.on('pointerdown', shoot, this); 
-    
+    this.input.on('pointerdown', shoot, this);
+
     enemies = this.physics.add.group({
         key: 'slime',
         repeat: 2,
-        setXY: { x: 100, y: 0, stepX: 200 },
-        setScale: { x: 0.15, y: 0.15},
-        setGravity: {x: 0, y: 0}
+        setXY: {
+            x: 100,
+            y: 0,
+            stepX: 200
+        },
+        setScale: {
+            x: 0.15,
+            y: 0.15
+        },
+        setGravity: {
+            x: 0,
+            y: 0
+        }
     });
-    
+
     this.physics.add.collider(enemies, platforms);
     // Add overlap detection (when bullet touches enemy)
-    
+
     this.physics.add.overlap(bullets, enemies, respawnEnemy, null, this);
-    
+
     this.physics.add.overlap(player, enemies, respawnPlayer, null, this);
-    
+
     // Create cursors for player movement
     cursors = this.input.keyboard.createCursorKeys();
 }
@@ -122,8 +144,7 @@ function update() {
     // Move player left or right
     if (cursors.left.isDown) {
         player.setVelocityX(-160); // Move left
-    }
-    else if (cursors.right.isDown) {
+    } else if (cursors.right.isDown) {
         player.setVelocityX(160); // Move right
     }
 
@@ -131,17 +152,19 @@ function update() {
     if (cursors.up.isDown && player.body.touching.down) {
         player.setVelocityY(-330); // Jump
     }
-    
-    enemies.getChildren().forEach(function(item){
+
+    enemies.getChildren().forEach(function(item) {
         if (player.x > item.x) {
             item.setVelocityX(10);
-        }
-        else {
+        } else {
             item.setVelocityX(-10);
         }
-        
+        if (player.y <= item.y && item.body.touching.down) {
+            item.setVelocityY(-200);
+        }
+
     }, this);
-    
+
 }
 
 
@@ -155,7 +178,7 @@ function collectStar(player, star) {
 
     // Show the star again
     star.setVisible(true);
-    
+
 
     // Update the score
     score += 10;
@@ -183,7 +206,7 @@ function respawnPlayer(player, enemy) {
 
     // Show the star again
     player.setVisible(true);
-    
+
 
     // Update the score
     score -= 50;
@@ -191,11 +214,11 @@ function respawnPlayer(player, enemy) {
 }
 
 function shoot(pointer) {
-  // Get the angle towards the mouse position
-  let angle = Phaser.Math.Angle.Between(player.x, player.y, pointer.x, pointer.y);
-  
-  // Create a bullet
-  let bullet = bullets.get(player.x, player.y);
+    // Get the angle towards the mouse position
+    let angle = Phaser.Math.Angle.Between(player.x, player.y, pointer.x, pointer.y);
+
+    // Create a bullet
+    let bullet = bullets.get(player.x, player.y);
     bullet.setScale(0.1);
     bullet.setBounce(0.9);
     this.physics.velocityFromRotation(angle, 300, bullet.body.velocity);
