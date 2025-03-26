@@ -6,7 +6,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: true
+            debug: false
         }
     },
     scene: {
@@ -26,22 +26,20 @@ let enemies;
 let playerDirection = [0, -1];
 let lastFired = 0; // Track the last time a bullet was fired
 let currtime = 0;
+
 const fireRate = 300; // Cooldown duration in milliseconds
 const playerSpeed = 200;
 const bulletSpeed = 400;
+const enemySpeed = 100;
 
 function preload() {
     // Load assets
-    this.load.image('sky', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/8bit-pixel-art-night-sky-game-space-landscape_8071-65145.avif');
     this.load.image('player', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/spaceship.png'); // Replace with your image path
     this.load.image('bullet', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/ball.png'); // Replace with your image path
     this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/alien.png');   // Replace with your image path
 }
 
 function create() {
-    
-    // Add background
-    this.add.image(200, 200, 'sky').setScale(1.5);
 //     // Create player sprite
      player = this.physics.add.sprite(400, 300, 'player');
      player.setCollideWorldBounds(true);
@@ -65,10 +63,10 @@ function create() {
 
     // Spawn enemies at random positions
     for (let i = 0; i < 10; i++) {
-        const x = Phaser.Math.Between(50, 750);
-        const y = Phaser.Math.Between(50, 550);
+        const x = Phaser.Math.Between(50, 550);
+        const y = Phaser.Math.Between(50, 350);
         const enemy = enemies.create(x, y, 'enemy');
-        enemy.setVelocity(Phaser.Math.Between(-50, 50), Phaser.Math.Between(-50, 50));
+        enemy.setVelocity(Phaser.Math.Between(-enemySpeed, enemySpeed), Phaser.Math.Between(-enemySpeed, enemySpeed));
         enemy.setCollideWorldBounds(true);
         enemy.setScale(0.2);
         enemy.setBounce(1); // Make enemies bounce off world bounds
@@ -99,18 +97,19 @@ function update() {
     }
     let pY = playerSpeed * playerDirection[1];
     player.setVelocityY(pY);
-    
-    const angle = Math.atan2(playerDirection[1], playerDirection[0]);
-
+    let isPlayerMoving = (playerDirection[1] != 0 || playerDirection[0] != 0);
     // Set the sprite's rotation based on the calculated angle
-    player.setRotation(angle);
+    if (isPlayerMoving) {
+        const angle = Math.atan2(playerDirection[1], playerDirection[0]);
+        player.setRotation(angle);
+    }
     
     
 
 //     // Shooting bullets with cooldown
     
     currtime = Date.now();
-     if (cursors.space.isDown && currtime > lastFired + fireRate) {
+     if (cursors.space.isDown && currtime > lastFired + fireRate && isPlayerMoving) {
          shoot();
      }
 
@@ -131,8 +130,8 @@ function shoot() {
     bullet.setScale(0.1);
 
     if (player.body.velocity.x == 0 && player.body.velocity.y == 0) {
-        bullet.setVelocityX(0);
-        bullet.setVelocityY(-bulletSpeed);
+        bullet.setVelocityX(bulletSpeed);
+        bullet.setVelocityY(0);
     } else {
         let x = bulletSpeed * playerDirection[0];
         let y = bulletSpeed * playerDirection[1];
@@ -147,6 +146,7 @@ function onBulletHitEnemy(bullet, enemy) {
     // Deactivate bullet and destroy enemy
     bullet.setActive(false);
     bullet.setVisible(false);
+    bullet.destroy();
     enemy.destroy(); // Removes the enemy from the game
 }
 
