@@ -31,6 +31,7 @@ let score = 0;
 let scoreText;
 let health = 3;
 let healthText;
+let lastHit = 0;
 
 const fireRate = 300;
 const playerSpeed = 200;
@@ -144,7 +145,7 @@ function update() {
 
     enemies.children.each(enemy => {
         let chanceShoot = Phaser.Math.Between(1, 1000);
-        if (chanceShoot > 990) {
+        if (chanceShoot > 999) {
             enemyShoot(enemy);
         }
     });
@@ -189,9 +190,10 @@ function onBulletHitEnemy(bullet, enemy) {
 }
 
 function onPlayerHitEnemy(p, enemy) {
-    if (isStarted && health > 0) {
+    if (isStarted && health > 0 && currTime > lastHit + 1000) {
         health--;
         healthText.setText('Health: ' + health);
+        lastHit = currTime;
     }
     
     if (isStarted && health < 1) {
