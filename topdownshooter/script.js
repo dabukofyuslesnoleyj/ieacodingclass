@@ -22,16 +22,21 @@ let cursors;
 let bullets;
 let enemies;
 let enemyBullets;
-
-let playerDirection = [0, -1];
-let lastFired = 0;
-let currTime = 0;
-let isStarted = false;
 let score = 0;
 let scoreText;
 let health = 3;
 let healthText;
 let lastHit = 0;
+
+let playerDirection = [0, -1];
+let lastFired = 0;
+let currTime = 0;
+let isStarted = false;
+
+let lootBoxes;
+let currentBullet = "Normal";
+let specialAmmo = 0;
+let bulletText;
 
 const fireRate = 300;
 const playerSpeed = 200;
@@ -42,7 +47,8 @@ function preload() {
     this.load.image('player', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/spaceship.png');
     this.load.image('bullet', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/ball.png');
     this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/alien.png');
-    this.load.image('enemyBullet', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/platform.png');
+    this.load.image('enemyBullet', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/enemyBullet.png');
+    this.load.image('lootBox', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/randdom.png');
 }
 
 function create() {
@@ -64,11 +70,8 @@ function create() {
         defaultKey: 'enemy'
     });
 
-    enemyBullets = this.physics.add.group({
-        defaultKey: 'enemyBullet'
-    });
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 6; i++) {
         const x = Phaser.Math.Between(50, 550);
         const y = Phaser.Math.Between(50, 350);
         const enemy = enemies.create(x, y, 'enemy');
@@ -83,20 +86,35 @@ function create() {
     }
 
     this.physics.add.overlap(bullets, enemies, onBulletHitEnemy, null, this);
-
     this.physics.add.overlap(player, enemies, onPlayerHitEnemy, null, this);
 
-    this.physics.add.overlap(enemyBullets, player, onPlayerHitEnemy, null, this);
+    scoreText = this.add.text(15, 15, 'Score: 0', {
+        fontSize: '32px',
+        fill: '#fff'
+    });
 
-    scoreText = this.add.text(16, 16, 'Score: 0', {
+    healthText = this.add.text(350, 15, 'Health: ' + health, {
         fontSize: '32px',
         fill: '#fff'
     });
     
-    healthText = this.add.text(350, 16, 'Health: ' + health +'', {
-        fontSize: '32px',
+    bulletText = this.add.text(15, 350, 'Bullet: ' + currentBullet, {
+        fontSize: '16px',
         fill: '#fff'
     });
+
+    enemyBullets = this.physics.add.group({
+        defaultKey: 'enemyBullet'
+    });
+    
+    lootBoxes = this.physics.add.group({
+        defaultKey: 'lootBox'
+    });
+    
+    this.physics.add.overlap(player, lootBoxes, onPlayerHitLootBox, null, this);
+
+    this.physics.add.overlap(enemyBullets, player, onPlayerHitEnemy, null, this);
+
 }
 
 function update() {
@@ -134,7 +152,33 @@ function update() {
 
     currTime = Date.now();
     if (cursors.space.isDown && currTime > lastFired + fireRate && isPlayerMoving) {
-        shoot();
+        switch(currentBullet){
+            case "Spread": 
+                if(specialAmmo > 0) {
+                    shootSpread();
+                    specialAmmo -= 1;
+                }
+                else {
+                    shoot();
+                    currentBullet = "Normal";
+                    bulletText.setText('Bullet: ' + currentBullet);
+                }
+                break;
+            case "Big": 
+                if(specialAmmo > 0) {
+                    shootBig();
+                    specialAmmo -= 1;
+                }
+                else {
+                    shoot();
+                    currentBullet = "Normal";
+                    bulletText.setText('Bullet: ' + currentBullet);
+                }
+                break;
+            default:
+                shoot();
+        }
+        
     }
 
     bullets.children.each(bullet => {
@@ -142,7 +186,13 @@ function update() {
             bullet.destroy();
         }
     });
-
+    
+    enemyBullets.children.each(bullet => {
+        if (bullet.y < 0 || bullet.y > 400 || bullet.x < 0 || bullet.x > 600) {
+            bullet.destroy();
+        }
+    });
+    
     enemies.children.each(enemy => {
         let chanceShoot = Phaser.Math.Between(1, 1000);
         if (chanceShoot > 999) {
@@ -150,22 +200,6 @@ function update() {
         }
     });
 
-    enemyBullets.children.each(bullet => {
-        if (bullet.y < 0 || bullet.y > 400 || bullet.x < 0 || bullet.x > 600) {
-            bullet.destroy();
-        }
-    });
-}
-
-function enemyShoot(enemy) {
-    let bullet = enemyBullets.get(enemy.x, enemy.y);
-    bullet.setScale(0.05, 0.15);
-
-    let x = enemy.body.velocity.x * 1.5;
-    let y = enemy.body.velocity.y * 1.5;
-
-    bullet.setVelocityX(x);
-    bullet.setVelocityY(y);
 }
 
 function shoot() {
@@ -182,22 +216,114 @@ function shoot() {
     lastFired = currTime;
 }
 
+function shootSpread() {
+    let bullet = bullets.get(player.x, player.y);
+    let bulletDown = bullets.get(player.x, player.y);
+
+    bullet.setScale(0.1, 0.1);
+    bulletDown.setScale(0.1, 0.1);
+
+    let x = bulletSpeed * playerDirection[0];
+    let y = bulletSpeed * playerDirection[1];
+
+    bullet.setVelocityX(x);
+    bullet.setVelocityY(y);
+    
+    bulletDown.setVelocityX(-x);
+    bulletDown.setVelocityY(-y);
+    
+    lastFired = currTime;
+}
+
+function shootBig() {
+    let bullet = bullets.get(player.x, player.y);
+
+    bullet.setScale(0.5, 0.5);
+
+    let x = bulletSpeed * playerDirection[0];
+    let y = bulletSpeed * playerDirection[1];
+
+    bullet.setVelocityX(x);
+    bullet.setVelocityY(y);
+    //this.time.delayedCall(1, this.destroyObject, null, bullet);
+
+    lastFired = currTime;
+}
+
 function onBulletHitEnemy(bullet, enemy) {
+
+    let chanceLoot = Phaser.Math.Between(1, 3);
+    if (chanceLoot > 1) {
+        spawnLootBox(enemy);
+    }
+    
     bullet.destroy();
     enemy.destroy();
+    
     score += 10;
     scoreText.setText('Score: ' + score);
 }
 
-function onPlayerHitEnemy(p, enemy) {
-    if (isStarted && health > 0 && currTime > lastHit + 1000) {
-        health--;
+function onPlayerHitEnemy(player, enemy) {
+    if (isStarted && health > 0 && currTime > lastHit + 500) {
+        health -= 1;
         healthText.setText('Health: ' + health);
         lastHit = currTime;
     }
-    
+
     if (isStarted && health < 1) {
-        p.setVisible(false);
-        p.setActive(false);
+        player.setVisible(false);
+        player.setActive(false);
     }
 }
+
+function enemyShoot(enemy) {
+    let enemyBullet = enemyBullets.get(enemy.x, enemy.y);
+    enemyBullet.setScale(0.1, 0.1);
+    
+    let x = enemy.body.velocity.x * 1.5;
+    let y = enemy.body.velocity.y * 1.5;
+    
+    enemyBullet.setVelocityX(x);
+    enemyBullet.setVelocityY(y);
+}
+
+function spawnLootBox(enemy) {
+    const x = Phaser.Math.Between(50, 550);
+    const y = Phaser.Math.Between(50, 350);
+    const lootBox = lootBoxes.create(enemy.x, enemy.y, 'lootBox');
+
+    let lootBoxSpeedX = Phaser.Math.Between(-enemySpeed, enemySpeed);
+    let lootBoxSpeedY = Phaser.Math.Between(-enemySpeed, enemySpeed);
+
+    lootBox.setVelocity(lootBoxSpeedX, lootBoxSpeedY);
+    lootBox.setCollideWorldBounds(true);
+    lootBox.setScale(0.1);
+    lootBox.setBounce(1);
+}
+
+function onPlayerHitLootBox(player, lootBox) {
+    lootBox.destroy();
+    let chancePrize = Phaser.Math.Between(1, 4);
+    switch(chancePrize) {
+        case 1: 
+            currentBullet = "Spread";
+            bulletText.setText('Bullet: ' + currentBullet);
+            specialAmmo = 5;
+            break;
+        case 2:
+            currentBullet = "Big";
+            bulletText.setText('Bullet: ' + currentBullet);
+            specialAmmo = 5;
+            break;
+        case 3: 
+            health +=1;
+            healthText.setText('Health: ' + health);
+            break;
+        case 4:
+            score +=50;
+            scoreText.setText('Score: ' + score);
+            break;
+    }
+}
+
