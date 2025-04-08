@@ -70,20 +70,7 @@ function create() {
         defaultKey: 'enemy'
     });
 
-
-    for (let i = 0; i < 6; i++) {
-        const x = Phaser.Math.Between(50, 550);
-        const y = Phaser.Math.Between(50, 350);
-        const enemy = enemies.create(x, y, 'enemy');
-
-        let enemySpeedX = Phaser.Math.Between(-enemySpeed, enemySpeed);
-        let enemySpeedY = Phaser.Math.Between(-enemySpeed, enemySpeed);
-
-        enemy.setVelocity(enemySpeedX, enemySpeedY);
-        enemy.setCollideWorldBounds(true);
-        enemy.setScale(0.2);
-        enemy.setBounce(1);
-    }
+    spawnEnemies(6);
 
     this.physics.add.overlap(bullets, enemies, onBulletHitEnemy, null, this);
     this.physics.add.overlap(player, enemies, onPlayerHitEnemy, null, this);
@@ -97,7 +84,7 @@ function create() {
         fontSize: '32px',
         fill: '#fff'
     });
-    
+
     bulletText = this.add.text(15, 350, 'Bullet: ' + currentBullet, {
         fontSize: '16px',
         fill: '#fff'
@@ -106,11 +93,11 @@ function create() {
     enemyBullets = this.physics.add.group({
         defaultKey: 'enemyBullet'
     });
-    
+
     lootBoxes = this.physics.add.group({
         defaultKey: 'lootBox'
     });
-    
+
     this.physics.add.overlap(player, lootBoxes, onPlayerHitLootBox, null, this);
 
     this.physics.add.overlap(enemyBullets, player, onPlayerHitEnemy, null, this);
@@ -152,33 +139,7 @@ function update() {
 
     currTime = Date.now();
     if (cursors.space.isDown && currTime > lastFired + fireRate && isPlayerMoving) {
-        switch(currentBullet){
-            case "Spread": 
-                if(specialAmmo > 0) {
-                    shootSpread();
-                    specialAmmo -= 1;
-                }
-                else {
-                    shoot();
-                    currentBullet = "Normal";
-                    bulletText.setText('Bullet: ' + currentBullet);
-                }
-                break;
-            case "Big": 
-                if(specialAmmo > 0) {
-                    shootBig();
-                    specialAmmo -= 1;
-                }
-                else {
-                    shoot();
-                    currentBullet = "Normal";
-                    bulletText.setText('Bullet: ' + currentBullet);
-                }
-                break;
-            default:
-                shoot();
-        }
-        
+        shootWithOptions();
     }
 
     bullets.children.each(bullet => {
@@ -186,13 +147,13 @@ function update() {
             bullet.destroy();
         }
     });
-    
+
     enemyBullets.children.each(bullet => {
         if (bullet.y < 0 || bullet.y > 400 || bullet.x < 0 || bullet.x > 600) {
             bullet.destroy();
         }
     });
-    
+
     enemies.children.each(enemy => {
         let chanceShoot = Phaser.Math.Between(1, 1000);
         if (chanceShoot > 999) {
@@ -200,6 +161,33 @@ function update() {
         }
     });
 
+}
+
+function shootWithOptions() {
+    switch (currentBullet) {
+        case "Spread":
+            if (specialAmmo > 0) {
+                shootSpread();
+                specialAmmo -= 1;
+            } else {
+                shoot();
+                currentBullet = "Normal";
+                bulletText.setText('Bullet: ' + currentBullet);
+            }
+            break;
+        case "Big":
+            if (specialAmmo > 0) {
+                shootBig();
+                specialAmmo -= 1;
+            } else {
+                shoot();
+                currentBullet = "Normal";
+                bulletText.setText('Bullet: ' + currentBullet);
+            }
+            break;
+        default:
+            shoot();
+    }
 }
 
 function shoot() {
@@ -228,10 +216,10 @@ function shootSpread() {
 
     bullet.setVelocityX(x);
     bullet.setVelocityY(y);
-    
+
     bulletDown.setVelocityX(-x);
     bulletDown.setVelocityY(-y);
-    
+
     lastFired = currTime;
 }
 
@@ -256,10 +244,10 @@ function onBulletHitEnemy(bullet, enemy) {
     if (chanceLoot > 1) {
         spawnLootBox(enemy);
     }
-    
+
     bullet.destroy();
     enemy.destroy();
-    
+
     score += 10;
     scoreText.setText('Score: ' + score);
 }
@@ -280,10 +268,10 @@ function onPlayerHitEnemy(player, enemy) {
 function enemyShoot(enemy) {
     let enemyBullet = enemyBullets.get(enemy.x, enemy.y);
     enemyBullet.setScale(0.1, 0.1);
-    
+
     let x = enemy.body.velocity.x * 1.5;
     let y = enemy.body.velocity.y * 1.5;
-    
+
     enemyBullet.setVelocityX(x);
     enemyBullet.setVelocityY(y);
 }
@@ -305,8 +293,8 @@ function spawnLootBox(enemy) {
 function onPlayerHitLootBox(player, lootBox) {
     lootBox.destroy();
     let chancePrize = Phaser.Math.Between(1, 4);
-    switch(chancePrize) {
-        case 1: 
+    switch (chancePrize) {
+        case 1:
             currentBullet = "Spread";
             bulletText.setText('Bullet: ' + currentBullet);
             specialAmmo = 5;
@@ -316,14 +304,29 @@ function onPlayerHitLootBox(player, lootBox) {
             bulletText.setText('Bullet: ' + currentBullet);
             specialAmmo = 5;
             break;
-        case 3: 
-            health +=1;
+        case 3:
+            health += 1;
             healthText.setText('Health: ' + health);
             break;
         case 4:
-            score +=50;
+            score += 50;
             scoreText.setText('Score: ' + score);
             break;
     }
 }
 
+function spawnEnemies(enemyCount) {
+    for (let i = 0; i < enemyCount; i++) {
+        const x = Phaser.Math.Between(50, 550);
+        const y = Phaser.Math.Between(50, 350);
+        const enemy = enemies.create(x, y, 'enemy');
+
+        let enemySpeedX = Phaser.Math.Between(-enemySpeed, enemySpeed);
+        let enemySpeedY = Phaser.Math.Between(-enemySpeed, enemySpeed);
+
+        enemy.setVelocity(enemySpeedX, enemySpeedY);
+        enemy.setCollideWorldBounds(true);
+        enemy.setScale(0.2);
+        enemy.setBounce(1);
+    }
+}
