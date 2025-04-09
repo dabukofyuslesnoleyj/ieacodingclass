@@ -44,18 +44,18 @@ const bulletSpeed = 400;
 const enemySpeed = 100;
 
 function preload() {
-    this.load.image('player', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/spaceship.png');
-    this.load.image('bullet', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/ball.png');
-    this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/alien.png');
-    this.load.image('enemyBullet', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/enemyBullet.png');
-    this.load.image('lootBox', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/randdom.png');
+    this.load.image('player', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/spaceShooter.png');
+    this.load.image('bullet', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/plasma.png');
+    this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/newAlien.png');
+    this.load.image('enemyBullet', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/newEnemyBullet.png');
+    this.load.image('lootBox', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/bonusItem.png');
 }
 
 function create() {
 
     player = this.physics.add.sprite(400, 300, 'player');
     player.setCollideWorldBounds(true);
-    player.setScale(0.2);
+    player.setScale(0.15);
 
     cursors = this.input.keyboard.createCursorKeys();
     this.input.keyboard.addKeys({
@@ -70,7 +70,7 @@ function create() {
         defaultKey: 'enemy'
     });
 
-    spawnEnemies(6);
+    spawnEnemies(1);
 
     this.physics.add.overlap(bullets, enemies, onBulletHitEnemy, null, this);
     this.physics.add.overlap(player, enemies, onPlayerHitEnemy, null, this);
@@ -286,7 +286,7 @@ function spawnLootBox(enemy) {
 
     lootBox.setVelocity(lootBoxSpeedX, lootBoxSpeedY);
     lootBox.setCollideWorldBounds(true);
-    lootBox.setScale(0.1);
+    lootBox.setScale(0.25);
     lootBox.setBounce(1);
 }
 
@@ -326,7 +326,7 @@ function spawnEnemies(enemyCount) {
 
         enemy.setVelocity(enemySpeedX, enemySpeedY);
         enemy.setCollideWorldBounds(true);
-        enemy.setScale(0.2);
+        enemy.setScale(0.15);
         enemy.setBounce(1);
     }
 }
