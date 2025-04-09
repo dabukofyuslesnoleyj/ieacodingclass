@@ -38,7 +38,7 @@ let currentBullet = "Normal";
 let specialAmmo = 0;
 let bulletText;
 
-const fireRate = 300;
+let fireRate = 300;
 const playerSpeed = 200;
 const bulletSpeed = 400;
 const enemySpeed = 100;
@@ -143,12 +143,14 @@ function update() {
     }
 
     bullets.children.each(bullet => {
+        bullet.setAngle(bullet.angle+10);
         if (bullet.y < 0 || bullet.y > 400 || bullet.x < 0 || bullet.x > 600) {
             bullet.destroy();
         }
     });
 
     enemyBullets.children.each(bullet => {
+        bullet.setAngle(bullet.angle+10);
         if (bullet.y < 0 || bullet.y > 400 || bullet.x < 0 || bullet.x > 600) {
             bullet.destroy();
         }
@@ -180,6 +182,17 @@ function shootWithOptions() {
                 shootBig();
                 specialAmmo -= 1;
             } else {
+                shoot();
+                currentBullet = "Normal";
+                bulletText.setText('Bullet: ' + currentBullet);
+            }
+            break;
+        case "Fast":
+            if (specialAmmo > 0) {
+                shoot();
+                specialAmmo -= 1;
+            } else {
+                fireRate = 300;
                 shoot();
                 currentBullet = "Normal";
                 bulletText.setText('Bullet: ' + currentBullet);
@@ -233,7 +246,6 @@ function shootBig() {
 
     bullet.setVelocityX(x);
     bullet.setVelocityY(y);
-    //this.time.delayedCall(1, this.destroyObject, null, bullet);
 
     lastFired = currTime;
 }
@@ -292,7 +304,7 @@ function spawnLootBox(enemy) {
 
 function onPlayerHitLootBox(player, lootBox) {
     lootBox.destroy();
-    let chancePrize = Phaser.Math.Between(1, 4);
+    let chancePrize = Phaser.Math.Between(1, 5);
     switch (chancePrize) {
         case 1:
             currentBullet = "Spread";
@@ -311,6 +323,12 @@ function onPlayerHitLootBox(player, lootBox) {
         case 4:
             score += 50;
             scoreText.setText('Score: ' + score);
+            break;
+        case 5:
+            currentBullet = "Fast";
+            fireRate = 100;
+            bulletText.setText('Bullet: ' + currentBullet);
+            specialAmmo = 20;
             break;
     }
 }
