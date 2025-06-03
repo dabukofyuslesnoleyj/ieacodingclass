@@ -15,9 +15,22 @@ class GorillaGame extends Phaser.Scene {
         this.gorilla.setScale(0.3);
         this.gorilla.setCollideWorldBounds(true);
         
-        this.lives = 2;
+        this.lives = 3;
         this.energy = 100;
+        this.maxEnergy = 100;
         this.energyRegenRate = 1;
+
+        // Regenerate energy every 0.5 seconds
+        this.time.addEvent({
+            delay: 50, // 500ms = half a second
+            loop: true,
+            callback: () => {
+                if (this.energy < this.maxEnergy) {
+                    this.energy += this.energyRegenRate;
+                }
+            }
+        });
+
         
         this.spawnEnemies(5);
         
@@ -34,9 +47,6 @@ class GorillaGame extends Phaser.Scene {
     }
 
     update() {
-        if (this.energy < 100) {
-            this.energy += this.energyRegenRate;
-        }
         
         this.handleGorillaMovement();
         this.handleEnemyMovement();
