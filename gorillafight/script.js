@@ -4,15 +4,16 @@ class GorillaGame extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('gorilla', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/ball.png');
-        this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/slime.png');
-        this.load.image('shockwave', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/enemyBullet.png');
+        this.load.image('gorilla', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/gorilla.png');
+        this.load.image('gorillaSlam', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/gorillaSlam.png');
+        this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/man.png');
+        this.load.image('shockwave', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/slam.png');
 
     }
 
     create() {
         this.gorilla = this.physics.add.sprite(300, 200, 'gorilla');
-        this.gorilla.setScale(0.3);
+        this.gorilla.setScale(0.15);
         this.gorilla.setCollideWorldBounds(true);
         
         this.lives = 3;
@@ -77,7 +78,7 @@ class GorillaGame extends Phaser.Scene {
             let enemy = this.physics.add.sprite(Phaser.Math.Between(100, 700), Phaser.Math.Between(100, 500), 'enemy');
             enemy.setCollideWorldBounds(false);
             enemy.setBounce(1);
-            enemy.setScale(0.2);
+            enemy.setScale(0.1);
             enemy.stunned = false; // Track stun state
             this.enemies.add(enemy);
         }
@@ -96,6 +97,8 @@ class GorillaGame extends Phaser.Scene {
     performGroundSlam() {
         if (this.energy >= 30) {
             this.energy -= 30;
+            
+            this.gorilla.setTexture("gorillaSlam");
             
             // Screen shake effect
             this.cameras.main.shake(200, 0.01);
@@ -138,6 +141,10 @@ class GorillaGame extends Phaser.Scene {
 
                 }
             });
+            this.time.delayedCall(300, () => {
+                this.gorilla.setTexture("gorilla");
+            });
+            
         }
     }
 }
