@@ -8,12 +8,15 @@ class GorillaGame extends Phaser.Scene {
         this.load.image('gorillaSlam', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/gorillaSlam.png');
         this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/man.png');
         this.load.image('shockwave', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/slam.png');
+        this.load.image('background', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/grass.png');
 
     }
 
     create() {
+        this.add.image(300, 200, 'background').setOrigin(0.5, 0.5);
+        
         this.gorilla = this.physics.add.sprite(300, 200, 'gorilla');
-        this.gorilla.setScale(0.15);
+        this.gorilla.setScale(0.2);
         this.gorilla.setCollideWorldBounds(true);
         
         this.lives = 3;
@@ -66,7 +69,7 @@ class GorillaGame extends Phaser.Scene {
        this.enemies.children.iterate(enemy => {
             if (!enemy.stunned) {
                 let direction = new Phaser.Math.Vector2(this.gorilla.x - enemy.x, this.gorilla.y - enemy.y).normalize();
-                enemy.setVelocity(direction.x * 100, direction.y * 100);
+                enemy.setVelocity(direction.x * 50, direction.y * 100);
             }
         });
     }
@@ -78,7 +81,7 @@ class GorillaGame extends Phaser.Scene {
             let enemy = this.physics.add.sprite(Phaser.Math.Between(100, 700), Phaser.Math.Between(100, 500), 'enemy');
             enemy.setCollideWorldBounds(false);
             enemy.setBounce(1);
-            enemy.setScale(0.1);
+            enemy.setScale(0.15);
             enemy.stunned = false; // Track stun state
             this.enemies.add(enemy);
         }
