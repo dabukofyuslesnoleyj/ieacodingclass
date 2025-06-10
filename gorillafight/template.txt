@@ -1,0 +1,58 @@
+class GorillaGame extends Phaser.Scene {
+    constructor() {
+        super({ key: 'GorillaGame' });
+    }
+
+    preload() {
+        this.load.image('gorilla', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/gorilla.png');
+        this.load.image('gorillaSlam', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/gorillaSlam.png');
+        this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/man.png');
+        this.load.image('shockwave', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/slam.png');
+        this.load.image('background', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/grass.png');
+
+    }
+
+    create() {
+        
+
+    }
+
+    update() {
+        
+    }
+    
+    handleGorillaMovement() {
+        
+    }
+
+    handleEnemyMovement() {
+       
+    }
+    
+    spawnEnemies(enemyCount) {
+        
+    }
+
+    hitGorilla(gorilla, enemy) {
+
+    }
+
+    performGroundSlam() {
+        
+    }
+}
+
+const config = {
+    type: Phaser.AUTO,
+    width: 600,
+    height: 400,
+    scene: GorillaGame,
+    physics: { default: 'arcade' }
+};
+
+const game = new Phaser.Game(config);
+
+
+
+
+
