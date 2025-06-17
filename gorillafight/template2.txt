@@ -1,0 +1,115 @@
+class GorillaGame extends Phaser.Scene {
+    constructor() {
+        super({ key: 'GorillaGame' });
+    }
+
+    preload() {
+        this.load.image('gorilla', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/gorilla.png');
+        this.load.image('gorillaSlam', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/gorillaSlam.png');
+        this.load.image('enemy', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/man.png');
+        this.load.image('shockwave', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/slam.png');
+        this.load.image('background', '/res/9155856b-c0e8-4d2d-8c8b-ee1f8e295509/grass.png');
+
+    }
+
+    create() {
+        this.add.image(300, 200, 'background').setOrigin(0.5,0.5);
+        
+        this.gorilla = this.physics.add.sprite(300, 200, 'gorilla');
+        this.gorilla.setScale(0.2);
+        this.gorilla.setCollideWorldBounds(true);
+        
+        this.lives = 10;
+        this.energy = 100;
+        this.maxEnergy = 100;
+        this.energyRegenRate = 1;
+        
+        this.time.addEvent({
+            delay: 50,
+            loop: true,
+            callback: () => {
+                if (this.energy < this.maxEnergy) { 
+                    this.energy += this.energyRegenRate
+                }
+            }
+        });
+        
+        this.shockwave = this.add.image(this.gorilla.x, this.gorilla.y, 'shockwave');
+        this.shockwave.setScale(0);
+        this.shockwave.setAlpha(0);
+        
+        this.input.keyboard.on('keydown-SPACE', this.performGroundSlam, this);
+        this.cursors = this.input.keyboard.createCursorKeys();
+    }
+
+    update() {
+        this.handleGorillaMovement();
+        this.handleEnemyMovement();
+    }
+    
+    handleGorillaMovement() {
+        this.gorilla.setVelocity(0);
+        if (this.cursors.left.isDown) {
+            this.gorilla.setVelocityX(-100);
+        }
+        else if (this.cursors.right.isDown) {
+            this.gorilla.setVelocityX(100);
+        }
+        
+        if (this.cursors.up.isDown) {
+            this.gorilla.setVelocityY(-100);
+        }
+        else if (this.cursors.down.isDown) {
+            this.gorilla.setVelocityY(100);
+        }
+    }
+
+    handleEnemyMovement() {
+       
+    }
+    
+    spawnEnemies(enemyCount) {
+        
+    }
+
+    hitGorilla(gorilla, enemy) {
+
+    }
+
+    performGroundSlam() {
+        if (this.energy >= 30) {
+            this.energy -= 30;
+            this.gorilla.setTexture('gorillaSlam');
+            
+            this.cameras.main.shake(200, 0.01);
+            
+            this.shockwave.setPosition(this.gorilla.x, this.gorilla.y);
+            this.shockwave.setScale(0.5).setAlpha(1);
+            this.tweens.add({
+                targets: this.shockwave,
+                scale: {from: 0.1, to: 1},
+                alpha: {from: 1, to: 0},
+                duration:300,
+                onComplete: () => this.shockwave.setScale(0).setAlpha(0)
+            });
+           this.time.delayedCall(300, () => {
+               this.gorilla.setTexture('gorilla');
+           }); 
+        }
+    }
+}
+
+const config = {
+    type: Phaser.AUTO,
+    width: 600,
+    height: 400,
+    scene: GorillaGame,
+    physics: { default: 'arcade' }
+};
+
+const game = new Phaser.Game(config);
+
+
+
+
+
